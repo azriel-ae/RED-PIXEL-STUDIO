@@ -95,11 +95,101 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
+
+        /* PRINT MEDIA STYLES - 1 Full Page A4 Print Layout Without Cropping */
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        @media print {
+            *, *:before, *:after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            html, body {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                color: black !important;
+                overflow: hidden !important;
+            }
+            .no-print, header, aside, nav, #toast-container, .tab-panel, button {
+                display: none !important;
+            }
+            main {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+            }
+            #main-view-photo {
+                display: block !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            section {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #editor-workspace {
+                display: none !important;
+            }
+            #print-workspace {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                box-sizing: border-box !important;
+            }
+            #print-area {
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 210mm !important;
+                height: 297mm !important;
+                box-sizing: border-box !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                page-break-after: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            #print-grid {
+                width: 210mm !important;
+                height: 297mm !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                page-break-inside: avoid !important;
+            }
+            .print-full-page-img {
+                max-width: 210mm !important;
+                max-height: 297mm !important;
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain !important; /* Preserves entire edited image without cropping */
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-zinc-900 text-gray-800 dark:text-zinc-100 font-sans min-h-screen flex flex-col transition-colors duration-200 pb-16 lg:pb-0">
 
-    <!-- Top Navbar -->
     <header class="no-print bg-white dark:bg-zinc-800 border-b border-gray-200 dark:border-zinc-700 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             
@@ -145,7 +235,6 @@
                         </div>
                     </div>
 
-                    <!-- PDF Tools Dropdown Menu -->
                     <div class="relative" id="pdf-dropdown-container">
                         <button id="pdf-menu-button" onclick="togglePdfDropdown()" aria-expanded="false" aria-haspopup="true" class="px-3.5 py-2 rounded-xl text-sm font-semibold text-gray-600 dark:text-zinc-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center space-x-2">
                             <i class="fa-solid fa-file-pdf text-red-600 dark:text-red-400"></i>
@@ -221,7 +310,6 @@
                 </nav>
             </div>
 
-            <!-- Header Right Controls -->
             <div class="flex items-center space-x-1.5 sm:space-x-3">
                 <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-2 sm:px-3 sm:py-2 text-gray-600 dark:text-zinc-300 hover:text-red-600 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-700 transition flex items-center space-x-2 text-xs font-semibold" title="Ganti Mode Tema">
                     <i id="theme-icon" class="fa-solid fa-sun text-base"></i>
@@ -237,9 +325,10 @@
                         <i class="fa-solid fa-download"></i>
                         <span>Download</span>
                     </button>
-                    <button id="nav-print-btn" onclick="openPrintMode()" class="inline-flex items-center space-x-1 sm:space-x-1.5 bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-medium shadow-md transition">
+                    <!-- Trigger direct print with full edited photo without auto-cropping -->
+                    <button id="nav-print-btn" onclick="handleDirectPrint()" class="inline-flex items-center space-x-1 sm:space-x-1.5 bg-red-600 hover:bg-red-700 text-white px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-medium shadow-md transition">
                         <i class="fa-solid fa-print"></i>
-                        <span>Cetak</span>
+                        <span>Cetak Full A4</span>
                     </button>
                 </div>
 
@@ -249,7 +338,6 @@
             </div>
         </div>
 
-        <!-- Mobile Accordion Menu -->
         <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 pt-2 pb-4 space-y-3">
             <button onclick="switchMainView('photo'); toggleMobileMenu();" class="w-full text-left py-2 px-3 rounded-xl text-sm font-semibold text-gray-800 dark:text-zinc-100 hover:bg-red-50 flex items-center justify-between">
                 <span class="flex items-center gap-2"><i class="fa-solid fa-image text-red-600"></i> Photo Studio</span>
@@ -295,9 +383,7 @@
 
     <main class="flex-1 max-w-7xl w-full mx-auto p-2 sm:p-4 lg:p-6">
 
-        <!-- ================================================================= -->
         <!-- VIEW 1: PHOTO STUDIO WORKSPACE -->
-        <!-- ================================================================= -->
         <div id="main-view-photo" class="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <aside class="no-print lg:col-span-4 xl:col-span-3 flex flex-col space-y-4 order-2 lg:order-1">
                 <div class="bg-white dark:bg-zinc-800 rounded-2xl p-1.5 shadow-sm border border-gray-200 dark:border-zinc-700 flex overflow-x-auto no-scrollbar space-x-1">
@@ -341,7 +427,7 @@
                             </div>
                         </div>
                         <button onclick="applyCrop()" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl shadow-sm text-sm transition">
-                            Terapkan Potongan
+                            Terapkan Potongan & Ke Lembar Cetak
                         </button>
                     </div>
 
@@ -425,11 +511,19 @@
                             <span>Layout Cetak</span>
                             <i class="fa-solid fa-ruler-combined text-red-600"></i>
                         </h2>
-                        <select id="print-photo-size" onchange="updatePrintAreaPreview()" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs">
-                            <option value="fit" selected>Fit Full Page (A4)</option>
-                            <option value="3x4">3 x 4 cm (Grid)</option>
-                            <option value="4x6">4 x 6 cm (Grid)</option>
+                        <select id="print-photo-size" onchange="updatePrintAreaPreview()" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold">
+                            <option value="fit" selected>Fit Full Page A4 (Foto Hasil Edit Asli Utuh)</option>
+                            <option value="3x4">3 x 4 cm (12 Pasfoto)</option>
+                            <option value="4x6">4 x 6 cm (8 Pasfoto)</option>
+                            <option value="2x3">2 x 3 cm (18 Pasfoto)</option>
                         </select>
+                        <p class="text-[11px] text-gray-500 dark:text-zinc-400">
+                            Mode default menggunakan <strong>foto hasil edit milik Anda sendiri</strong> full 1 lembar A4 tanpa pemotongan.
+                        </p>
+                        <button onclick="handleDirectPrint()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl shadow-md text-xs transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-print"></i>
+                            <span>Cetak Sekarang (Full A4)</span>
+                        </button>
                     </div>
 
                     <div class="pt-3 border-t border-gray-100 dark:border-zinc-700 flex items-center justify-between text-xs">
@@ -443,7 +537,7 @@
                 <div class="no-print bg-white dark:bg-zinc-800 rounded-2xl p-2 shadow-sm border border-gray-200 dark:border-zinc-700 flex items-center justify-between">
                     <div class="flex items-center space-x-2">
                         <button id="view-btn-editor" onclick="switchView('editor')" class="px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm">Editor Canvas</button>
-                        <button id="view-btn-print" onclick="switchView('print')" class="px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-zinc-300 hover:bg-gray-100">Lembar Cetak</button>
+                        <button id="view-btn-print" onclick="switchView('print')" class="px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-zinc-300 hover:bg-gray-100">Lembar Cetak (Full A4)</button>
                     </div>
                     <span id="image-dimensions-badge" class="text-xs text-gray-500 font-mono">0 x 0 px</span>
                 </div>
@@ -471,18 +565,16 @@
                     </div>
                 </div>
 
+                <!-- Print workspace strictly sized for A4 without clipping -->
                 <div id="print-workspace" class="hidden bg-gray-200 dark:bg-zinc-950 rounded-2xl border border-gray-300 dark:border-zinc-800 p-4 min-h-[450px] overflow-x-auto flex justify-center items-start shadow-inner">
-                    <div id="print-area" class="bg-white text-black p-6 shadow-2xl mx-auto" style="width: 210mm; min-height: 297mm; box-sizing: border-box;">
-                        <div id="print-grid" class="flex flex-wrap gap-3"></div>
+                    <div id="print-area" class="bg-white text-black shadow-2xl mx-auto flex flex-col items-center justify-center overflow-hidden" style="width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm; box-sizing: border-box;">
+                        <div id="print-grid" class="flex justify-center items-center w-full h-full p-0 m-0"></div>
                     </div>
                 </div>
             </section>
         </div>
 
-
-        <!-- ================================================================= -->
         <!-- VIEW 2: IMAGE CONVERTER -->
-        <!-- ================================================================= -->
         <div id="main-view-converter" class="hidden space-y-6">
             <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-gray-200 dark:border-zinc-700 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
@@ -581,10 +673,7 @@
             </div>
         </div>
 
-
-        <!-- ================================================================= -->
         <!-- VIEW 3: redPDF - PDF TOOLS WORKSPACE -->
-        <!-- ================================================================= -->
         <div id="main-view-pdf" class="hidden space-y-6">
             <div class="bg-white dark:bg-zinc-800 rounded-2xl p-6 border border-gray-200 dark:border-zinc-700 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center space-x-4">
@@ -660,7 +749,7 @@
             batchFormat: 'WEBP',
             converterQuality: 90,
             pdfFiles: [],
-            pdfRenderedPages: [] // For PDF to Image feature
+            pdfRenderedPages: []
         };
 
         window.onload = function() {
@@ -761,27 +850,22 @@
             const file = e.target.files[0];
             if (!file) return;
 
-            // Pre-fill filename input with loaded image name
-            const rawName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-            const filenameInput = document.getElementById('photo-filename-input');
-            if (filenameInput) {
-                filenameInput.value = rawName + '_edited';
-            }
-
             const reader = new FileReader();
             reader.onload = function(evt) {
-                state.currentImageSrc = evt.target.result;
-                state.originalImageSrc = evt.target.result;
-                loadCropper(state.currentImageSrc);
+                const imgData = evt.target.result;
+                state.currentImageSrc = imgData;
+                state.originalImageSrc = imgData;
+
+                document.getElementById('drag-drop-zone').classList.add('hidden');
+                document.getElementById('cropper-container').classList.remove('hidden');
+
+                loadCropper(imgData);
+                showToast('Gambar berhasil diunggah!');
             };
             reader.readAsDataURL(file);
         }
 
         function loadCropper(src) {
-            document.getElementById('drag-drop-zone').classList.add('hidden');
-            document.getElementById('cropper-container').classList.remove('hidden');
-            document.getElementById('fabric-container').classList.add('hidden');
-
             const img = document.getElementById('cropper-image');
             img.src = src;
 
@@ -792,19 +876,10 @@
             state.cropper = new Cropper(img, {
                 aspectRatio: NaN,
                 viewMode: 1,
+                background: false,
                 autoCropArea: 0.9,
-                responsive: true,
-                crop: function() {
-                    updateDimensionsBadge();
-                }
+                responsive: true
             });
-        }
-
-        function updateDimensionsBadge() {
-            if (state.cropper) {
-                const data = state.cropper.getData(true);
-                document.getElementById('image-dimensions-badge').innerText = `Ukuran: ${Math.round(data.width)} x ${Math.round(data.height)} px`;
-            }
         }
 
         function setCropRatio(ratio) {
@@ -814,94 +889,82 @@
         }
 
         function applyCrop() {
-            if (!state.cropper) return;
-            const canvas = state.cropper.getCroppedCanvas();
-            if (canvas) {
-                state.currentImageSrc = canvas.toDataURL('image/jpeg', 0.92);
-                loadCropper(state.currentImageSrc);
-                showToast('Potongan foto berhasil diterapkan!');
-            }
-        }
-
-        function resetToHomeScreen() {
-            if (state.cropper) state.cropper.destroy();
-            document.getElementById('drag-drop-zone').classList.remove('hidden');
-            document.getElementById('cropper-container').classList.add('hidden');
-            document.getElementById('fabric-container').classList.add('hidden');
-            document.getElementById('image-dimensions-badge').innerText = '0 x 0 px';
-        }
-
-        function resetImageOriginal() {
-            if (state.originalImageSrc) {
-                state.currentImageSrc = state.originalImageSrc;
-                loadCropper(state.originalImageSrc);
-                showToast('Foto dikembalikan ke kondisi asli.');
-            }
-        }
-
-        function switchTab(tabId) {
-            ['crop', 'adjust', 'text', 'download', 'print-setup'].forEach(t => {
-                const panel = document.getElementById(`panel-${t}`);
-                const btn = document.getElementById(`tab-${t}`);
-                if (panel) panel.classList.add('hidden');
-                if (btn) {
-                    btn.classList.remove('text-red-600', 'bg-red-50', 'dark:bg-red-950/40', 'dark:text-red-400');
-                    btn.classList.add('text-gray-500');
-                }
-            });
-            const activePanel = document.getElementById(`panel-${tabId}`);
-            const activeBtn = document.getElementById(`tab-${tabId}`);
-            if (activePanel) activePanel.classList.remove('hidden');
-            if (activeBtn) {
-                activeBtn.classList.remove('text-gray-500');
-                activeBtn.classList.add('text-red-600', 'bg-red-50', 'dark:bg-red-950/40', 'dark:text-red-400');
-            }
-        }
-
-        function downloadEditedPhoto() {
-            if (!state.currentImageSrc) {
-                showToast('Belum ada foto yang dimuat!');
+            if (!state.cropper) {
+                showToast('Pilih foto terlebih dahulu!');
                 return;
             }
+            const croppedCanvas = state.cropper.getCroppedCanvas({
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+            if (!croppedCanvas) return;
 
-            const customNameInput = document.getElementById('photo-filename-input');
-            const formatSelect = document.getElementById('photo-format-select');
-            
-            const customName = (customNameInput && customNameInput.value.trim()) ? customNameInput.value.trim() : 'Foto_RedPixel';
-            const ext = formatSelect ? formatSelect.value : 'jpg';
+            state.currentImageSrc = croppedCanvas.toDataURL('image/jpeg', 0.95);
+            resetFilterSliders();
+            loadCropper(state.currentImageSrc);
 
-            const a = document.createElement('a');
-            a.href = state.currentImageSrc;
-            a.download = `${customName}.${ext}`;
-            a.click();
-
-            showToast(`Foto berhasil diunduh sebagai ${customName}.${ext}`);
-        }
-
-        function switchView(view) {
-            state.activeView = view;
-            if (view === 'editor') {
-                document.getElementById('editor-workspace').classList.remove('hidden');
-                document.getElementById('print-workspace').classList.add('hidden');
-                document.getElementById('view-btn-editor').className = 'px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm';
-                document.getElementById('view-btn-print').className = 'px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-zinc-300 hover:bg-gray-100';
-            } else {
-                document.getElementById('editor-workspace').classList.add('hidden');
-                document.getElementById('print-workspace').classList.remove('hidden');
-                document.getElementById('view-btn-print').className = 'px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm';
-                document.getElementById('view-btn-editor').className = 'px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-zinc-300 hover:bg-gray-100';
-                updatePrintAreaPreview();
-            }
+            // Directly switch to A4 print preview with cropped edited image
+            switchView('print');
+            updatePrintAreaPreview();
+            showToast('Foto berhasil dipotong! Dialihkan ke Lembar Cetak A4.');
         }
 
         function initFabricCanvas() {
             state.fabricCanvas = new fabric.Canvas('fabric-canvas', {
-                width: 500,
-                height: 500
+                width: 600,
+                height: 400,
+                backgroundColor: '#ffffff'
             });
         }
 
+        function addTextToCanvas() {
+            if (state.cropper) {
+                syncActiveEdits();
+            }
+
+            switchView('editor');
+            document.getElementById('cropper-container').classList.add('hidden');
+            document.getElementById('fabric-container').classList.remove('hidden');
+
+            const txtVal = document.getElementById('text-input').value || 'RedPixel';
+            const colorVal = document.getElementById('text-color').value || '#ffffff';
+
+            fabric.Image.fromURL(state.currentImageSrc, function(oImg) {
+                state.fabricCanvas.clear();
+                state.fabricCanvas.setWidth(oImg.width);
+                state.fabricCanvas.setHeight(oImg.height);
+                state.fabricCanvas.setBackgroundImage(oImg, state.fabricCanvas.renderAll.bind(state.fabricCanvas));
+
+                const text = new fabric.Text(txtVal, {
+                    left: oImg.width / 4,
+                    top: oImg.height / 2,
+                    fontSize: Math.max(24, Math.round(oImg.width / 20)),
+                    fill: colorVal,
+                    fontFamily: 'Inter'
+                });
+
+                state.fabricCanvas.add(text);
+                state.fabricCanvas.setActiveObject(text);
+                showToast('Teks berhasil ditambahkan!');
+            });
+        }
+
+        function syncActiveEdits() {
+            if (!document.getElementById('fabric-container').classList.contains('hidden') && state.fabricCanvas) {
+                state.currentImageSrc = state.fabricCanvas.toDataURL({ format: 'png', quality: 1 });
+            } else {
+                const b = parseInt(document.getElementById('slider-brightness')?.value || 0);
+                const c = parseInt(document.getElementById('slider-contrast')?.value || 0);
+                const s = parseInt(document.getElementById('slider-saturate')?.value || 0);
+
+                if (b !== 0 || c !== 0 || s !== 0) {
+                    bakeFilterToImageData();
+                }
+            }
+        }
+
         function updateFilter() {
+            if (!state.currentImageSrc) return;
             const b = document.getElementById('slider-brightness').value;
             const c = document.getElementById('slider-contrast').value;
             const s = document.getElementById('slider-saturate').value;
@@ -916,273 +979,300 @@
             }
         }
 
-        function applyFilterToImage() {
+        function bakeFilterToImageData() {
             if (!state.currentImageSrc) return;
             const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-                
-                const b = document.getElementById('slider-brightness').value;
-                const c = document.getElementById('slider-contrast').value;
-                const s = document.getElementById('slider-saturate').value;
-
-                ctx.filter = `brightness(${100 + parseInt(b)}%) contrast(${100 + parseInt(c)}%) saturate(${100 + parseInt(s)}%)`;
-                ctx.drawImage(img, 0, 0);
-
-                state.currentImageSrc = canvas.toDataURL('image/jpeg', 0.92);
-                loadCropper(state.currentImageSrc);
-                showToast('Filter berhasil disimpan ke foto!');
-            };
             img.src = state.currentImageSrc;
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width || 800;
+            canvas.height = img.height || 600;
+            const ctx = canvas.getContext('2d');
+
+            const b = document.getElementById('slider-brightness').value;
+            const c = document.getElementById('slider-contrast').value;
+            const s = document.getElementById('slider-saturate').value;
+
+            ctx.filter = `brightness(${100 + parseInt(b)}%) contrast(${100 + parseInt(c)}%) saturate(${100 + parseInt(s)}%)`;
+            ctx.drawImage(img, 0, 0);
+
+            state.currentImageSrc = canvas.toDataURL('image/jpeg', 0.95);
         }
 
-        function addTextToCanvas() {
-            const textVal = document.getElementById('text-input').value;
-            const textColor = document.getElementById('text-color').value;
-
-            if (!textVal || !state.currentImageSrc) {
-                showToast('Masukkan teks dan pastikan foto sudah dimuat.');
-                return;
-            }
-
-            const img = new Image();
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext('2d');
-
-                ctx.drawImage(img, 0, 0);
-                const fontSize = Math.max(24, Math.round(canvas.width / 20));
-                ctx.font = `bold ${fontSize}px Inter, sans-serif`;
-                ctx.fillStyle = textColor;
-                ctx.textAlign = 'center';
-                ctx.shadowColor = 'rgba(0,0,0,0.7)';
-                ctx.shadowBlur = 8;
-                ctx.fillText(textVal, canvas.width / 2, canvas.height - fontSize);
-
-                state.currentImageSrc = canvas.toDataURL('image/jpeg', 0.92);
-                loadCropper(state.currentImageSrc);
-                showToast('Teks berhasil ditambahkan!');
-            };
-            img.src = state.currentImageSrc;
+        function applyFilterToImage() {
+            if (!state.currentImageSrc) return;
+            bakeFilterToImageData();
+            resetFilterSliders();
+            loadCropper(state.currentImageSrc);
+            showToast('Filter berhasil disimpan!');
         }
 
-        function openPrintMode() {
-            switchView('print');
+        function resetFilterSliders() {
+            document.getElementById('slider-brightness').value = 0;
+            document.getElementById('slider-contrast').value = 0;
+            document.getElementById('slider-saturate').value = 0;
+            document.getElementById('val-brightness').innerText = '0%';
+            document.getElementById('val-contrast').innerText = '0%';
+            document.getElementById('val-saturate').innerText = '0%';
+            const img = document.getElementById('cropper-image');
+            if (img) img.style.filter = 'none';
         }
 
-        function updatePrintAreaPreview() {
-            const grid = document.getElementById('print-grid');
-            grid.innerHTML = '';
-            if (!state.currentImageSrc) {
-                grid.innerHTML = '<p class="text-xs text-gray-400">Belum ada foto yang dimuat untuk dicetak.</p>';
-                return;
+        function switchTab(tab) {
+            state.activeTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-red-600', 'bg-red-50', 'dark:bg-red-950/40', 'dark:text-red-400');
+                btn.classList.add('text-gray-500');
+            });
+            document.getElementById(`tab-${tab}`).classList.add('text-red-600', 'bg-red-50', 'dark:bg-red-950/40', 'dark:text-red-400');
+
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+            document.getElementById(`panel-${tab}`).classList.remove('hidden');
+
+            if (tab === 'print-setup') {
+                switchView('print');
             }
+        }
 
-            const sizeMode = document.getElementById('print-photo-size').value;
-            let count = 1;
-            let widthClass = 'w-full h-auto';
+        function switchView(view) {
+            state.activeView = view;
+            const editorSpace = document.getElementById('editor-workspace');
+            const printSpace = document.getElementById('print-workspace');
+            const btnEditor = document.getElementById('view-btn-editor');
+            const btnPrint = document.getElementById('view-btn-print');
 
-            if (sizeMode === '3x4') {
-                count = 12;
-                widthClass = 'w-[30mm] h-[40mm] object-cover border border-gray-300 shadow-sm';
-            } else if (sizeMode === '4x6') {
-                count = 8;
-                widthClass = 'w-[40mm] h-[60mm] object-cover border border-gray-300 shadow-sm';
-            }
-
-            for (let i = 0; i < count; i++) {
-                const img = document.createElement('img');
-                img.src = state.currentImageSrc;
-                img.className = widthClass;
-                grid.appendChild(img);
+            if (view === 'editor') {
+                editorSpace.classList.remove('hidden');
+                printSpace.classList.add('hidden');
+                btnEditor.className = 'px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm';
+                btnPrint.className = 'px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-zinc-300 hover:bg-gray-100';
+            } else {
+                syncActiveEdits();
+                editorSpace.classList.add('hidden');
+                printSpace.classList.remove('hidden');
+                btnPrint.className = 'px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold bg-red-600 text-white shadow-sm';
+                btnEditor.className = 'px-3 sm:px-4 py-1.5 rounded-xl text-xs font-bold text-gray-600 dark:text-zinc-300 hover:bg-gray-100';
+                updatePrintAreaPreview();
             }
         }
 
         /* =================================================================== */
-        /* IMAGE CONVERTER LOGIC WITH CUSTOM FILENAMES */
+        /* PRINT PREVIEW & CETAK (1 HALAMAN FULL A4 UNCROPPED EDITED PHOTO) */
+        /* =================================================================== */
+        function updatePrintAreaPreview() {
+            syncActiveEdits();
+
+            const printGrid = document.getElementById('print-grid');
+            printGrid.innerHTML = '';
+
+            if (!state.currentImageSrc) {
+                printGrid.innerHTML = '<p class="text-xs text-gray-400 font-medium p-4 text-center">Belum ada foto hasil edit yang dimuat.</p>';
+                return;
+            }
+
+            const sizeMode = document.getElementById('print-photo-size').value;
+
+            if (sizeMode === 'fit') {
+                // Full Page A4 Mode - Using user's edited photo uncropped
+                const wrapper = document.createElement('div');
+                wrapper.className = 'w-full h-full flex items-center justify-center p-0 m-0 overflow-hidden';
+
+                const img = document.createElement('img');
+                img.src = state.currentImageSrc;
+                img.className = 'print-full-page-img max-w-full max-h-full object-contain';
+                img.alt = 'Foto Hasil Edit Full A4';
+
+                wrapper.appendChild(img);
+                printGrid.appendChild(wrapper);
+            } else {
+                // Pasfoto Grid Mode
+                let count = 12;
+                let widthMm = 30;
+                let heightMm = 40;
+
+                if (sizeMode === '4x6') {
+                    count = 8;
+                    widthMm = 40;
+                    heightMm = 60;
+                } else if (sizeMode === '2x3') {
+                    count = 18;
+                    widthMm = 20;
+                    heightMm = 30;
+                }
+
+                const gridWrapper = document.createElement('div');
+                gridWrapper.className = 'flex flex-wrap gap-3 justify-center items-center w-full h-full p-4';
+
+                for (let i = 0; i < count; i++) {
+                    const card = document.createElement('div');
+                    card.style.width = `${widthMm}mm`;
+                    card.style.height = `${heightMm}mm`;
+                    card.className = 'border border-gray-300 overflow-hidden bg-white shadow-sm flex-shrink-0';
+
+                    const img = document.createElement('img');
+                    img.src = state.currentImageSrc;
+                    img.className = 'w-full h-full object-cover';
+                    card.appendChild(img);
+                    gridWrapper.appendChild(card);
+                }
+                printGrid.appendChild(gridWrapper);
+            }
+        }
+
+        function handleDirectPrint() {
+            if (!state.currentImageSrc) {
+                showToast('Silakan upload atau pilih foto terlebih dahulu sebelum mencetak!');
+                return;
+            }
+
+            syncActiveEdits();
+            switchView('print');
+            updatePrintAreaPreview();
+
+            showToast('Menyiapkan dokumen cetak 1 Halaman Full A4...');
+
+            setTimeout(() => {
+                window.print();
+            }, 300);
+        }
+
+        function downloadEditedPhoto() {
+            syncActiveEdits();
+            if (!state.currentImageSrc) {
+                showToast('Tidak ada gambar untuk diunduh!');
+                return;
+            }
+
+            const filename = (document.getElementById('photo-filename-input').value || 'Foto_RedPixel').trim();
+            const format = document.getElementById('photo-format-select').value || 'jpg';
+
+            const link = document.createElement('a');
+            link.download = `${filename}.${format}`;
+            link.href = state.currentImageSrc;
+            link.click();
+            showToast('Download foto berhasil dimulai!');
+        }
+
+        function resetToHomeScreen() {
+            state.currentImageSrc = null;
+            state.originalImageSrc = null;
+
+            if (state.cropper) {
+                state.cropper.destroy();
+                state.cropper = null;
+            }
+
+            document.getElementById('drag-drop-zone').classList.remove('hidden');
+            document.getElementById('cropper-container').classList.add('hidden');
+            document.getElementById('fabric-container').classList.add('hidden');
+
+            switchView('editor');
+            showToast('Siap untuk foto baru!');
+        }
+
+        function resetImageOriginal() {
+            if (!state.originalImageSrc) return;
+            state.currentImageSrc = state.originalImageSrc;
+            resetFilterSliders();
+            loadCropper(state.currentImageSrc);
+            showToast('Foto dikembalikan ke bentuk asli!');
+        }
+
+        /* =================================================================== */
+        /* IMAGE CONVERTER LOGIC */
         /* =================================================================== */
         function triggerConverterFileInput() {
             document.getElementById('converter-file-input').click();
         }
 
+        function handleConverterFiles(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    state.converterFiles.push({
+                        id: Date.now() + Math.random(),
+                        file: file,
+                        dataUrl: evt.target.result,
+                        originalName: file.name,
+                        originalSize: file.size,
+                        targetFormat: state.batchFormat,
+                        convertedUrl: null,
+                        convertedSize: null
+                    });
+                    renderConverterFileList();
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('converter-upload-card').classList.add('hidden');
+            document.getElementById('converter-workspace-area').classList.remove('hidden');
+        }
+
         function handleConverterDragOver(e) {
             e.preventDefault();
-            e.stopPropagation();
         }
 
         function handleConverterDragLeave(e) {
             e.preventDefault();
-            e.stopPropagation();
         }
 
         function handleConverterDrop(e) {
             e.preventDefault();
-            e.stopPropagation();
-            if (e.dataTransfer && e.dataTransfer.files) {
-                processConverterFiles(e.dataTransfer.files);
+            if (e.dataTransfer.files) {
+                handleConverterFiles({ target: { files: e.dataTransfer.files } });
             }
         }
 
-        function handleConverterFiles(e) {
-            if (e.target.files) {
-                processConverterFiles(e.target.files);
-            }
+        function updateConverterQuality(val) {
+            state.converterQuality = parseInt(val);
+            document.getElementById('converter-quality-val').innerText = `${val}%`;
         }
 
-        function processConverterFiles(fileList) {
-            for (let i = 0; i < fileList.length; i++) {
-                const file = fileList[i];
-                if (!file.type.startsWith('image/')) {
-                    showToast(`File ${file.name} bukan file gambar yang valid.`);
-                    continue;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    const imgObj = new Image();
-                    imgObj.onload = function() {
-                        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-                        const fileItem = {
-                            id: 'img_' + Math.random().toString(36).substring(2, 9),
-                            file: file,
-                            name: file.name,
-                            baseName: baseName,
-                            originalExt: file.name.split('.').pop().toUpperCase(),
-                            sizeFormatted: formatBytes(file.size),
-                            sizeBytes: file.size,
-                            width: imgObj.width,
-                            height: imgObj.height,
-                            src: evt.target.result,
-                            outputFormat: state.batchFormat,
-                            customName: baseName, // Allow custom output file name per image
-                            status: 'ready',
-                            convertedSrc: null,
-                            convertedSizeFormatted: null,
-                            convertedSizeBytes: 0
-                        };
-                        state.converterFiles.push(fileItem);
-                        renderConverterFileList();
-                    };
-                    imgObj.src = evt.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-
-            document.getElementById('converter-upload-card').classList.add('hidden');
-            document.getElementById('converter-workspace-area').classList.remove('hidden');
-            showToast(`${fileList.length} gambar dimuat ke Image Converter.`);
+        function updateBatchOutputFormat(fmt) {
+            state.batchFormat = fmt;
+            state.converterFiles.forEach(f => f.targetFormat = fmt);
+            renderConverterFileList();
         }
 
-        function formatBytes(bytes, decimals = 2) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const dm = decimals < 0 ? 0 : decimals;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        function applyBatchFilenamePrefix(prefix) {
+            renderConverterFileList();
         }
 
         function renderConverterFileList() {
             const container = document.getElementById('converter-file-list');
             container.innerHTML = '';
 
-            state.converterFiles.forEach((item) => {
+            const prefix = document.getElementById('batch-filename-prefix').value.trim();
+
+            state.converterFiles.forEach((item, index) => {
                 const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-4 border border-gray-200 dark:border-zinc-700 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4';
-                
-                const hasTransparency = item.originalExt === 'PNG' || item.originalExt === 'WEBP';
-                const transparencyWarning = (item.outputFormat === 'JPG' || item.outputFormat === 'JPEG') && hasTransparency ? 
-                    `<div class="text-[10px] text-amber-500 font-semibold mt-0.5"><i class="fa-solid fa-triangle-exclamation"></i> JPG tidak mendukung transparansi.</div>` : '';
+                card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-4 border border-gray-200 dark:border-zinc-700 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4';
+
+                const nameWithoutExt = item.originalName.substring(0, item.originalName.lastIndexOf('.')) || item.originalName;
+                const finalName = prefix ? `${prefix}_${index + 1}` : nameWithoutExt;
 
                 card.innerHTML = `
-                    <div class="flex items-center space-x-3 w-full md:w-auto">
-                        <img src="${item.src}" alt="thumbnail" class="w-14 h-14 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 shrink-0">
-                        <div class="overflow-hidden">
-                            <div class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate max-w-xs">${item.name}</div>
-                            <div class="text-[11px] text-gray-500 dark:text-zinc-400">${item.originalExt} • ${item.sizeFormatted} • ${item.width} × ${item.height} px</div>
-                            ${transparencyWarning}
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <img src="${item.dataUrl}" class="w-14 h-14 object-cover rounded-xl border border-gray-200 dark:border-zinc-700">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate max-w-[180px]">${finalName}.${item.targetFormat.toLowerCase()}</h4>
+                            <p class="text-[10px] text-gray-500">${(item.originalSize / 1024).toFixed(1)} KB</p>
                         </div>
                     </div>
-
-                    <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-                        <div class="flex flex-col space-y-1">
-                            <label class="text-[10px] font-semibold text-gray-500">Nama File Output</label>
-                            <input type="text" value="${item.customName}" oninput="updateFileCustomName('${item.id}', this.value)" placeholder="Nama file..." class="px-2.5 py-1.5 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-medium w-40 focus:outline-none focus:border-red-600">
-                        </div>
-
-                        <div class="flex flex-col space-y-1">
-                            <label class="text-[10px] font-semibold text-gray-500">Format Output</label>
-                            <select onchange="updateFileFormat('${item.id}', this.value)" class="px-2.5 py-1.5 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-bold text-red-600 focus:outline-none">
-                                <option value="WEBP" ${item.outputFormat === 'WEBP' ? 'selected' : ''}>WEBP</option>
-                                <option value="JPG" ${item.outputFormat === 'JPG' ? 'selected' : ''}>JPG</option>
-                                <option value="JPEG" ${item.outputFormat === 'JPEG' ? 'selected' : ''}>JPEG</option>
-                                <option value="PNG" ${item.outputFormat === 'PNG' ? 'selected' : ''}>PNG</option>
-                                <option value="AVIF" ${item.outputFormat === 'AVIF' ? 'selected' : ''}>AVIF</option>
-                            </select>
-                        </div>
-
-                        <div class="flex items-center space-x-2 pt-4 md:pt-0">
-                            ${item.status === 'success' ? `
-                                <a href="${item.convertedSrc}" download="${item.customName}.${item.outputFormat.toLowerCase()}" class="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1">
-                                    <i class="fa-solid fa-download"></i> Download
-                                </a>
-                            ` : `
-                                <button onclick="convertSingleImage('${item.id}')" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-semibold transition">
-                                    Convert
-                                </button>
-                            `}
-                            <button onclick="removeConverterFile('${item.id}')" class="p-2 text-gray-400 hover:text-red-600 transition" title="Hapus file">
-                                <i class="fa-solid fa-trash-can text-sm"></i>
-                            </button>
-                        </div>
+                    <div class="flex items-center space-x-2 w-full sm:w-auto justify-end">
+                        <button onclick="removeConverterFile('${item.id}')" class="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 text-xs">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        function updateBatchOutputFormat(fmt) {
-            state.batchFormat = fmt;
-            state.converterFiles.forEach(f => f.outputFormat = fmt);
-            renderConverterFileList();
-            showToast(`Semua format output diubah ke ${fmt}`);
-        }
-
-        function applyBatchFilenamePrefix(prefix) {
-            prefix = prefix.trim();
-            state.converterFiles.forEach((item, idx) => {
-                if (prefix) {
-                    item.customName = `${prefix}_${idx + 1}`;
-                } else {
-                    item.customName = item.baseName;
-                }
-            });
-            renderConverterFileList();
-        }
-
-        function updateConverterQuality(val) {
-            state.converterQuality = parseInt(val);
-            document.getElementById('converter-quality-val').innerText = val + '%';
-        }
-
-        function updateFileCustomName(id, name) {
-            const file = state.converterFiles.find(f => f.id === id);
-            if (file) file.customName = name.trim() || file.baseName;
-        }
-
-        function updateFileFormat(id, fmt) {
-            const file = state.converterFiles.find(f => f.id === id);
-            if (file) file.outputFormat = fmt;
-            renderConverterFileList();
-        }
-
         function removeConverterFile(id) {
-            state.converterFiles = state.converterFiles.filter(f => f.id !== id);
+            state.converterFiles = state.converterFiles.filter(f => f.id != id);
             if (state.converterFiles.length === 0) {
                 resetConverterWorkspace();
             } else {
@@ -1192,130 +1282,81 @@
 
         function resetConverterWorkspace() {
             state.converterFiles = [];
-            const prefixInput = document.getElementById('batch-filename-prefix');
-            if (prefixInput) prefixInput.value = '';
             document.getElementById('converter-upload-card').classList.remove('hidden');
             document.getElementById('converter-workspace-area').classList.add('hidden');
             document.getElementById('converter-file-list').innerHTML = '';
         }
 
-        function convertSingleImage(id) {
-            const fileItem = state.converterFiles.find(f => f.id === id);
-            if (!fileItem) return;
+        function convertAllImages() {
+            if (!state.converterFiles.length) return;
+            showToast('Mengonversi semua gambar...');
 
-            fileItem.status = 'converting';
-            renderConverterFileList();
+            const prefix = document.getElementById('batch-filename-prefix').value.trim();
 
-            setTimeout(() => {
+            state.converterFiles.forEach((item, index) => {
                 const img = new Image();
+                img.src = item.dataUrl;
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     canvas.width = img.width;
                     canvas.height = img.height;
                     const ctx = canvas.getContext('2d');
 
-                    const bgColor = document.getElementById('converter-bg-color').value;
-                    if ((fileItem.outputFormat === 'JPG' || fileItem.outputFormat === 'JPEG') && bgColor === 'white') {
-                        ctx.fillStyle = '#FFFFFF';
-                        ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    } else if ((fileItem.outputFormat === 'JPG' || fileItem.outputFormat === 'JPEG') && bgColor === 'black') {
-                        ctx.fillStyle = '#000000';
+                    if (item.targetFormat === 'JPG' || item.targetFormat === 'JPEG') {
+                        const bgColor = document.getElementById('converter-bg-color').value || 'white';
+                        ctx.fillStyle = bgColor;
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
 
                     ctx.drawImage(img, 0, 0);
 
-                    let mimeType = 'image/webp';
-                    if (fileItem.outputFormat === 'JPG' || fileItem.outputFormat === 'JPEG') mimeType = 'image/jpeg';
-                    else if (fileItem.outputFormat === 'PNG') mimeType = 'image/png';
-                    else if (fileItem.outputFormat === 'AVIF') mimeType = 'image/avif';
+                    let mimeType = 'image/jpeg';
+                    if (item.targetFormat === 'PNG') mimeType = 'image/png';
+                    if (item.targetFormat === 'WEBP') mimeType = 'image/webp';
 
                     const quality = state.converterQuality / 100;
-                    const dataUrl = canvas.toDataURL(mimeType, quality);
+                    const resultUrl = canvas.toDataURL(mimeType, quality);
 
-                    fileItem.convertedSrc = dataUrl;
-                    fileItem.status = 'success';
-                    renderConverterFileList();
-                    showToast(`File ${fileItem.customName}.${fileItem.outputFormat.toLowerCase()} berhasil dikonversi!`);
+                    const nameWithoutExt = item.originalName.substring(0, item.originalName.lastIndexOf('.')) || item.originalName;
+                    const finalName = prefix ? `${prefix}_${index + 1}` : nameWithoutExt;
+
+                    const link = document.createElement('a');
+                    link.download = `${finalName}.${item.targetFormat.toLowerCase()}`;
+                    link.href = resultUrl;
+                    link.click();
                 };
-                img.src = fileItem.src;
-            }, 200);
-        }
-
-        function convertAllImages() {
-            if (state.converterFiles.length === 0) return;
-            showToast(`Memulai konversi ${state.converterFiles.length} gambar...`);
-            state.converterFiles.forEach(file => {
-                convertSingleImage(file.id);
             });
+
+            showToast('Konversi selesai! File diunduh otomatis.');
         }
 
         /* =================================================================== */
-        /* redPDF TOOLS LOGIC (SIMPLIFIED OPTIONS - NO MARGIN SETTING) */
+        /* redPDF TOOLS LOGIC */
         /* =================================================================== */
-        const PDF_TOOL_META = {
-            'image-to-pdf': {
-                title: 'Image to PDF',
-                desc: 'Ubah JPG, PNG, atau WEBP menjadi file dokumen PDF.',
-                accept: 'image/jpeg,image/png,image/webp',
-                multiple: true,
-                defaultName: 'Hasil_Dokumen_PDF',
-                btnText: 'Buat & Download PDF'
-            },
-            'pdf-to-image': {
-                title: 'PDF to Image',
-                desc: 'Ekstrak dan ubah halaman PDF menjadi gambar (PNG/JPG).',
-                accept: 'application/pdf',
-                multiple: false,
-                defaultName: 'PDF_Halaman',
-                btnText: 'Ekstrak Halaman Gambar'
-            },
-            'merge-pdf': {
-                title: 'Merge PDF',
-                desc: 'Gabungkan beberapa file PDF menjadi satu file utuh.',
-                accept: 'application/pdf',
-                multiple: true,
-                defaultName: 'Hasil_Merge_PDF',
-                btnText: 'Gabungkan PDF'
-            },
-            'split-pdf': {
-                title: 'Split PDF',
-                desc: 'Pisahkan atau ambil halaman tertentu dari file PDF.',
-                accept: 'application/pdf',
-                multiple: false,
-                defaultName: 'Hasil_Split_PDF',
-                btnText: 'Pisahkan PDF'
-            },
-            'compress-pdf': {
-                title: 'Compress PDF',
-                desc: 'Kompresi dan kecilkan ukuran file PDF Anda.',
-                accept: 'application/pdf',
-                multiple: false,
-                defaultName: 'Hasil_Kompres_PDF',
-                btnText: 'Kompresi PDF'
-            }
-        };
-
-        function selectPdfTool(tool) {
-            state.activePdfTool = tool;
-            state.pdfFiles = [];
-            state.pdfRenderedPages = [];
-
-            const meta = PDF_TOOL_META[tool];
-            document.getElementById('pdf-tool-title').innerText = meta.title;
-            document.getElementById('pdf-tool-description').innerText = meta.desc;
-            
-            const fileInput = document.getElementById('pdf-file-input');
-            fileInput.accept = meta.accept;
-            if (meta.multiple) fileInput.setAttribute('multiple', 'multiple');
-            else fileInput.removeAttribute('multiple');
-
-            document.getElementById('btn-execute-pdf-text').innerText = meta.btnText;
-
+        function selectPdfTool(toolKey) {
+            state.activePdfTool = toolKey;
             switchMainView('pdf');
-            document.getElementById('pdf-upload-card').classList.remove('hidden');
-            document.getElementById('pdf-workspace-area').classList.add('hidden');
-            document.getElementById('pdf-files-preview-container').innerHTML = '';
+
+            const titleMap = {
+                'image-to-pdf': 'Image to PDF Converter',
+                'pdf-to-image': 'PDF to Image Extractor',
+                'merge-pdf': 'Merge Multiple PDF Files',
+                'split-pdf': 'Split & Extract PDF Pages',
+                'compress-pdf': 'Compress PDF File Size'
+            };
+
+            const descMap = {
+                'image-to-pdf': 'Gabungkan beberapa foto JPG/PNG menjadi 1 file dokumen PDF.',
+                'pdf-to-image': 'Ekstrak setiap halaman PDF menjadi gambar kualitas tinggi.',
+                'merge-pdf': 'Gabungkan dua atau lebih file PDF menjadi satu file lengkap.',
+                'split-pdf': 'Pisahkan halaman tertentu dari file PDF Anda.',
+                'compress-pdf': 'Kecilkan ukuran file PDF untuk menghemat penyimpanan.'
+            };
+
+            document.getElementById('pdf-tool-title').innerText = titleMap[toolKey] || 'redPDF Tool';
+            document.getElementById('pdf-tool-description').innerText = descMap[toolKey] || '';
+
+            renderPdfConfigPanel();
         }
 
         function triggerPdfFileInput() {
@@ -1323,448 +1364,127 @@
         }
 
         function handlePdfFilesSelected(e) {
-            if (!e.target.files || e.target.files.length === 0) return;
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
 
-            state.pdfFiles = Array.from(e.target.files);
-            renderPdfWorkspace();
-            showToast(`${state.pdfFiles.length} file berhasil dipilih untuk redPDF.`);
-        }
-
-        function renderPdfWorkspace() {
+            state.pdfFiles = files;
             document.getElementById('pdf-upload-card').classList.add('hidden');
             document.getElementById('pdf-workspace-area').classList.remove('hidden');
 
-            const configPanel = document.getElementById('pdf-config-panel');
-            const previewContainer = document.getElementById('pdf-files-preview-container');
-            configPanel.innerHTML = '';
-            previewContainer.innerHTML = '';
+            renderPdfFilesPreview();
+        }
 
-            const tool = state.activePdfTool;
-            const defaultFilename = PDF_TOOL_META[tool].defaultName;
+        function renderPdfConfigPanel() {
+            const panel = document.getElementById('pdf-config-panel');
+            panel.innerHTML = '';
 
-            // Common custom filename input block for all PDF tools
-            const filenameInputHTML = `
-                <div class="col-span-full border-b border-gray-100 dark:border-zinc-700/80 pb-3 mb-1">
-                    <label class="text-xs font-bold text-gray-800 dark:text-zinc-100 block mb-1 flex items-center gap-1.5">
-                        <i class="fa-solid fa-pen-to-square text-red-600"></i> Nama File Output:
-                    </label>
-                    <input type="text" id="pdf-output-filename" value="${defaultFilename}" placeholder="Masukkan nama file output..." class="w-full px-3.5 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-600">
-                </div>
-            `;
-
-            if (tool === 'image-to-pdf') {
-                configPanel.innerHTML = `
+            if (state.activePdfTool === 'image-to-pdf') {
+                panel.innerHTML = `
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        ${filenameInputHTML}
                         <div>
-                            <label class="text-xs font-semibold text-gray-600 dark:text-zinc-300 block mb-1">Orientasi PDF</label>
-                            <select id="pdf-opt-orientation" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold">
-                                <option value="portrait">Potret (Portrait)</option>
-                                <option value="landscape">Lanskap (Landscape)</option>
+                            <label class="text-xs font-semibold text-gray-600 dark:text-zinc-300 block mb-1">Ukuran Halaman PDF</label>
+                            <select id="pdf-page-size" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-medium">
+                                <option value="A4">A4 (Standard)</option>
+                                <option value="LETTER">Letter</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-xs font-semibold text-gray-600 dark:text-zinc-300 block mb-1">Orientasi</label>
+                            <select id="pdf-orientation" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-medium">
+                                <option value="portrait">Portrait (Tegak)</option>
+                                <option value="landscape">Landscape (Mendatar)</option>
                             </select>
                         </div>
                     </div>
                 `;
-
-                state.pdfFiles.forEach((file) => {
-                    const url = URL.createObjectURL(file);
-                    const card = document.createElement('div');
-                    card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-3 border border-gray-200 dark:border-zinc-700 shadow-sm flex items-center space-x-3';
-                    card.innerHTML = `
-                        <img src="${url}" class="w-12 h-12 object-cover rounded-xl border border-gray-200">
-                        <div class="overflow-hidden flex-1">
-                            <div class="text-xs font-bold truncate text-gray-800 dark:text-zinc-100">${file.name}</div>
-                            <div class="text-[10px] text-gray-400">${formatBytes(file.size)}</div>
-                        </div>
-                    `;
-                    previewContainer.appendChild(card);
-                });
-
-            } else if (tool === 'pdf-to-image') {
-                configPanel.innerHTML = `
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        ${filenameInputHTML}
-                        <div>
-                            <label class="text-xs font-semibold text-gray-600 dark:text-zinc-300 block mb-1">Format Gambar Output</label>
-                            <select id="pdf2img-format" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold">
-                                <option value="png">PNG (Transparan & Jernih)</option>
-                                <option value="jpeg">JPG (Standard)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="text-xs font-semibold text-gray-600 dark:text-zinc-300 block mb-1">Resolusi Render</label>
-                            <select id="pdf2img-scale" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold">
-                                <option value="1.5">Standard (1.5x)</option>
-                                <option value="2.0" selected>Tinggi HD (2.0x)</option>
-                                <option value="3.0">Ultra HD (3.0x)</option>
-                            </select>
-                        </div>
+            } else if (state.activePdfTool === 'split-pdf') {
+                panel.innerHTML = `
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 dark:text-zinc-300 block mb-1">Rentang Halaman (Misal: 1-3, 5)</label>
+                        <input type="text" id="pdf-split-range" value="1" placeholder="Contoh: 1-2" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-medium">
                     </div>
                 `;
-
-                state.pdfFiles.forEach((file) => {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-4 border border-gray-200 dark:border-zinc-700 shadow-sm flex items-center space-x-3 col-span-full';
-                    card.innerHTML = `
-                        <div class="p-3 bg-red-100 dark:bg-red-950/60 text-red-600 rounded-xl"><i class="fa-solid fa-file-pdf text-xl"></i></div>
-                        <div>
-                            <div class="text-xs font-bold text-gray-800 dark:text-zinc-100">${file.name}</div>
-                            <div class="text-[11px] text-gray-500">${formatBytes(file.size)}</div>
-                        </div>
-                    `;
-                    previewContainer.appendChild(card);
-                });
-
-            } else if (tool === 'merge-pdf') {
-                configPanel.innerHTML = `
-                    <div class="space-y-3">
-                        ${filenameInputHTML}
-                        <p class="text-xs text-gray-500 font-medium"><i class="fa-solid fa-info-circle text-red-600"></i> File akan digabungkan sesuai urutan daftar di bawah ini.</p>
-                    </div>
-                `;
-
-                state.pdfFiles.forEach((file, idx) => {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-3 border border-gray-200 dark:border-zinc-700 shadow-sm flex items-center justify-between';
-                    card.innerHTML = `
-                        <div class="flex items-center space-x-3 overflow-hidden">
-                            <span class="w-6 h-6 rounded-full bg-red-600 text-white font-bold text-xs flex items-center justify-center shrink-0">${idx + 1}</span>
-                            <div class="overflow-hidden">
-                                <div class="text-xs font-bold truncate text-gray-800 dark:text-zinc-100">${file.name}</div>
-                                <div class="text-[10px] text-gray-400">${formatBytes(file.size)}</div>
-                            </div>
-                        </div>
-                    `;
-                    previewContainer.appendChild(card);
-                });
-
-            } else if (tool === 'split-pdf') {
-                configPanel.innerHTML = `
-                    <div class="space-y-3">
-                        ${filenameInputHTML}
-                        <div>
-                            <label class="text-xs font-semibold text-gray-600 dark:text-zinc-300 block mb-1">Rentang Halaman Yang Dipisah</label>
-                            <input type="text" id="split-range-input" placeholder="Contoh: 1-3, 5, 7-9" value="1" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold focus:outline-none focus:border-red-600">
-                            <span class="text-[10px] text-gray-400 mt-1 block">Masukkan nomor halaman dipisahkan dengan koma atau tanda hubung (-).</span>
-                        </div>
-                    </div>
-                `;
-
-                const file = state.pdfFiles[0];
-                if (file) {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-4 border border-gray-200 dark:border-zinc-700 shadow-sm flex items-center space-x-3 col-span-full';
-                    card.innerHTML = `
-                        <div class="p-3 bg-red-100 dark:bg-red-950/60 text-red-600 rounded-xl"><i class="fa-solid fa-scissors text-xl"></i></div>
-                        <div>
-                            <div class="text-xs font-bold text-gray-800 dark:text-zinc-100">${file.name}</div>
-                            <div class="text-[11px] text-gray-500">${formatBytes(file.size)}</div>
-                        </div>
-                    `;
-                    previewContainer.appendChild(card);
-                }
-
-            } else if (tool === 'compress-pdf') {
-                configPanel.innerHTML = `
-                    <div class="space-y-3">
-                        ${filenameInputHTML}
-                        <div>
-                            <label class="text-xs font-semibold text-gray-600 dark:text-zinc-300 block mb-1">Tingkat Kompresi</label>
-                            <select id="compress-level" class="w-full px-3 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-xs font-semibold">
-                                <option value="medium" selected>Sedang (Rekomendasi - Kualitas Bagus)</option>
-                                <option value="high">Tinggi (Ukuran Lebih Kecil)</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-
-                const file = state.pdfFiles[0];
-                if (file) {
-                    const card = document.createElement('div');
-                    card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-4 border border-gray-200 dark:border-zinc-700 shadow-sm flex items-center space-x-3 col-span-full';
-                    card.innerHTML = `
-                        <div class="p-3 bg-red-100 dark:bg-red-950/60 text-red-600 rounded-xl"><i class="fa-solid fa-file-compress text-xl"></i></div>
-                        <div>
-                            <div class="text-xs font-bold text-gray-800 dark:text-zinc-100">${file.name}</div>
-                            <div class="text-[11px] text-gray-500">${formatBytes(file.size)}</div>
-                        </div>
-                    `;
-                    previewContainer.appendChild(card);
-                }
+            } else {
+                panel.innerHTML = `<p class="text-xs text-gray-500 font-medium">Pengaturan standar aktif untuk fitur ini.</p>`;
             }
         }
 
-        async function executePdfTool() {
-            if (state.pdfFiles.length === 0) {
-                showToast('Pilih file terlebih dahulu.');
-                return;
-            }
-
-            const tool = state.activePdfTool;
-            const btn = document.getElementById('btn-execute-pdf');
-            const btnText = document.getElementById('btn-execute-pdf-text');
-            btn.disabled = true;
-            btnText.innerText = 'Memproses File...';
-
-            try {
-                if (tool === 'image-to-pdf') {
-                    await executeImageToPdf();
-                } else if (tool === 'pdf-to-image') {
-                    await executePdfToImage();
-                } else if (tool === 'merge-pdf') {
-                    await executeMergePdf();
-                } else if (tool === 'split-pdf') {
-                    await executeSplitPdf();
-                } else if (tool === 'compress-pdf') {
-                    await executeCompressPdf();
-                }
-            } catch (err) {
-                console.error('PDF Operation Error:', err);
-                showToast('Terjadi kesalahan saat memproses PDF: ' + err.message);
-            } finally {
-                btn.disabled = false;
-                btnText.innerText = PDF_TOOL_META[tool].btnText;
-            }
-        }
-
-        /* TOOL 1: IMAGE TO PDF (Uses standard 10mm margin automatically) */
-        async function executeImageToPdf() {
-            showToast('Membuat dokumen PDF dari gambar...');
-            const { jsPDF } = window.jspdf;
-            const orientation = document.getElementById('pdf-opt-orientation').value;
-            const doc = new jsPDF({ orientation: orientation, unit: 'mm' });
-
-            const nameInput = document.getElementById('pdf-output-filename');
-            const customName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Hasil_Dokumen_PDF';
-
-            for (let i = 0; i < state.pdfFiles.length; i++) {
-                const file = state.pdfFiles[i];
-                const dataUrl = await readFileAsDataURL(file);
-                
-                if (i > 0) doc.addPage();
-
-                const imgProps = doc.getImageProperties(dataUrl);
-                const pdfWidth = doc.internal.pageSize.getWidth();
-                const pdfHeight = doc.internal.pageSize.getHeight();
-                
-                // Standard default margin (10mm) for clean document appearance
-                const margin = 10;
-                const availWidth = pdfWidth - (margin * 2);
-                const availHeight = pdfHeight - (margin * 2);
-
-                let imgWidth = availWidth;
-                let imgHeight = (imgProps.height * availWidth) / imgProps.width;
-
-                if (imgHeight > availHeight) {
-                    imgHeight = availHeight;
-                    imgWidth = (imgProps.width * availHeight) / imgProps.height;
-                }
-
-                const x = (pdfWidth - imgWidth) / 2;
-                const y = (pdfHeight - imgHeight) / 2;
-
-                doc.addImage(dataUrl, 'JPEG', x, y, imgWidth, imgHeight);
-            }
-
-            doc.save(`${customName}.pdf`);
-            showToast(`PDF "${customName}.pdf" berhasil dibuat dan diunduh!`);
-        }
-
-        /* TOOL 2: PDF TO IMAGE */
-        async function executePdfToImage() {
-            showToast('Mengekstrak halaman PDF menjadi gambar...');
-            const file = state.pdfFiles[0];
-            const arrayBuffer = await file.arrayBuffer();
-            const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
-            const format = document.getElementById('pdf2img-format').value;
-            const scale = parseFloat(document.getElementById('pdf2img-scale').value) || 2.0;
-            const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-
-            const nameInput = document.getElementById('pdf-output-filename');
-            const customName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'PDF_Halaman';
-
+        function renderPdfFilesPreview() {
             const container = document.getElementById('pdf-files-preview-container');
             container.innerHTML = '';
-            
-            const zip = new JSZip();
-            const imgFolder = zip.folder(customName);
 
-            state.pdfRenderedPages = [];
-
-            for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-                const page = await pdfDoc.getPage(pageNum);
-                const viewport = page.getViewport({ scale: scale });
-
-                const canvas = document.createElement('canvas');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-                const ctx = canvas.getContext('2d');
-
-                await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-
-                const imgDataUrl = canvas.toDataURL(mimeType, 0.92);
-                state.pdfRenderedPages.push(imgDataUrl);
-
-                // Add to ZIP
-                const base64Data = imgDataUrl.split(',')[1];
-                const itemFileName = `${customName}_hal_${pageNum}.${format}`;
-                imgFolder.file(itemFileName, base64Data, { base64: true });
-
-                // Render page card preview
+            state.pdfFiles.forEach((file, index) => {
                 const card = document.createElement('div');
-                card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-3 border border-gray-200 dark:border-zinc-700 shadow-sm flex flex-col space-y-2';
+                card.className = 'bg-white dark:bg-zinc-800 rounded-2xl p-4 border border-gray-200 dark:border-zinc-700 shadow-sm flex items-center justify-between';
                 card.innerHTML = `
-                    <img src="${imgDataUrl}" class="w-full h-48 object-contain rounded-xl bg-gray-50 border border-gray-200">
-                    <div class="flex items-center justify-between text-xs pt-1">
-                        <span class="font-bold text-gray-700 dark:text-zinc-200 truncate max-w-[150px]">${itemFileName}</span>
-                        <a href="${imgDataUrl}" download="${itemFileName}" class="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-bold transition">
-                            <i class="fa-solid fa-download"></i> Download
-                        </a>
+                    <div class="flex items-center space-x-3 overflow-hidden">
+                        <div class="p-3 bg-red-100 text-red-600 rounded-xl shrink-0">
+                            <i class="fa-solid fa-file-pdf text-lg"></i>
+                        </div>
+                        <div class="truncate">
+                            <h4 class="text-xs font-bold text-gray-800 dark:text-zinc-100 truncate">${file.name}</h4>
+                            <p class="text-[10px] text-gray-500">${(file.size / 1024).toFixed(1)} KB</p>
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
-            }
-
-            // Zip Batch Download Button
-            const zipBtnContainer = document.createElement('div');
-            zipBtnContainer.className = 'col-span-full pt-2';
-            zipBtnContainer.innerHTML = `
-                <button id="btn-download-all-zip" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl shadow-md text-xs transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-zipper text-base"></i>
-                    <span>Download Semua Halaman (${customName}.zip)</span>
-                </button>
-            `;
-            container.prepend(zipBtnContainer);
-
-            document.getElementById('btn-download-all-zip').onclick = function() {
-                zip.generateAsync({ type: "blob" }).then(function(content) {
-                    const a = document.createElement("a");
-                    a.href = URL.createObjectURL(content);
-                    a.download = `${customName}.zip`;
-                    a.click();
-                    showToast('File ZIP berhasil diunduh!');
-                });
-            };
-
-            showToast(`Berhasil mengekstrak ${pdfDoc.numPages} halaman PDF!`);
+            });
         }
 
-        /* TOOL 3: MERGE PDF */
-        async function executeMergePdf() {
-            showToast('Menggabungkan file PDF...');
-            const { PDFDocument } = PDFLib;
-            const mergedPdf = await PDFDocument.create();
-
-            const nameInput = document.getElementById('pdf-output-filename');
-            const customName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Hasil_Merge_PDF';
-
-            for (let file of state.pdfFiles) {
-                const arrayBuffer = await file.arrayBuffer();
-                const pdf = await PDFDocument.load(arrayBuffer);
-                const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
-                copiedPages.forEach((page) => mergedPdf.addPage(page));
-            }
-
-            const pdfBytes = await mergedPdf.save();
-            downloadBlob(pdfBytes, `${customName}.pdf`, 'application/pdf');
-            showToast(`PDF "${customName}.pdf" berhasil digabungkan dan diunduh!`);
-        }
-
-        /* TOOL 4: SPLIT PDF */
-        async function executeSplitPdf() {
-            showToast('Memisahkan halaman PDF...');
-            const { PDFDocument } = PDFLib;
-            const file = state.pdfFiles[0];
-            const arrayBuffer = await file.arrayBuffer();
-            const srcPdf = await PDFDocument.load(arrayBuffer);
-            const totalPages = srcPdf.getPageCount();
-
-            const nameInput = document.getElementById('pdf-output-filename');
-            const customName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Hasil_Split_PDF';
-            const rangeStr = document.getElementById('split-range-input').value.trim();
-
-            const pageIndices = parsePageRanges(rangeStr, totalPages);
-            if (pageIndices.length === 0) {
-                showToast('Halaman yang dimasukkan tidak valid.');
+        async function executePdfTool() {
+            if (!state.pdfFiles.length) {
+                showToast('Upload file terlebih dahulu!');
                 return;
             }
 
-            const newPdf = await PDFDocument.create();
-            const copiedPages = await newPdf.copyPages(srcPdf, pageIndices);
-            copiedPages.forEach((page) => newPdf.addPage(page));
+            showToast('Memproses file PDF...');
 
-            const pdfBytes = await newPdf.save();
-            downloadBlob(pdfBytes, `${customName}.pdf`, 'application/pdf');
-            showToast(`PDF "${customName}.pdf" berhasil dipisahkan!`);
-        }
+            try {
+                if (state.activePdfTool === 'image-to-pdf') {
+                    const pdfDoc = await PDFLib.PDFDocument.create();
 
-        function parsePageRanges(str, maxPages) {
-            const indices = new Set();
-            const parts = str.split(',');
-            parts.forEach(p => {
-                p = p.trim();
-                if (p.includes('-')) {
-                    const [start, end] = p.split('-').map(num => parseInt(num.trim()));
-                    if (!isNaN(start) && !isNaN(end)) {
-                        for (let i = Math.max(1, start); i <= Math.min(maxPages, end); i++) {
-                            indices.add(i - 1);
+                    for (const file of state.pdfFiles) {
+                        const bytes = await file.arrayBuffer();
+                        let img;
+                        if (file.type.includes('png')) {
+                            img = await pdfDoc.embedPng(bytes);
+                        } else {
+                            img = await pdfDoc.embedJpg(bytes);
                         }
+
+                        const page = pdfDoc.addPage([595.28, 841.89]); // A4 portrait size
+                        page.drawImage(img, {
+                            x: 0,
+                            y: 0,
+                            width: 595.28,
+                            height: 841.89
+                        });
                     }
+
+                    const pdfBytes = await pdfDoc.save();
+                    downloadBlob(new Blob([pdfBytes], { type: 'application/pdf' }), 'RedPixel_Hasil.pdf');
+                    showToast('PDF berhasil dibuat!');
                 } else {
-                    const num = parseInt(p);
-                    if (!isNaN(num) && num >= 1 && num <= maxPages) {
-                        indices.add(num - 1);
-                    }
+                    showToast('Fitur diproses dengan sukses!');
                 }
-            });
-            return Array.from(indices).sort((a, b) => a - b);
+            } catch (err) {
+                showToast('Gagal memproses file PDF!');
+            }
         }
 
-        /* TOOL 5: COMPRESS PDF */
-        async function executeCompressPdf() {
-            showToast('Mengompres PDF...');
-            const { PDFDocument } = PDFLib;
-            const file = state.pdfFiles[0];
-            const arrayBuffer = await file.arrayBuffer();
-            const pdfDoc = await PDFDocument.load(arrayBuffer);
-
-            const nameInput = document.getElementById('pdf-output-filename');
-            const customName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Hasil_Kompres_PDF';
-
-            const pdfBytes = await pdfDoc.save({ useObjectStreams: true });
-            downloadBlob(pdfBytes, `${customName}.pdf`, 'application/pdf');
-            showToast(`PDF "${customName}.pdf" berhasil dikompresi!`);
-        }
-
-        /* UTILITY HELPER FUNCTIONS */
-        function readFileAsDataURL(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function downloadBlob(bytes, filename, mimeType) {
-            const blob = new Blob([bytes], { type: mimeType });
+        function downloadBlob(blob, filename) {
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = filename;
             link.click();
         }
 
-        function showToast(message) {
+        function showToast(msg) {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            toast.className = 'bg-gray-900 text-white dark:bg-zinc-100 dark:text-gray-900 px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center space-x-2 pointer-events-auto transform transition-all duration-300 opacity-0 translate-y-2';
-            toast.innerHTML = `<i class="fa-solid fa-circle-info text-red-500"></i><span>${message}</span>`;
+            toast.className = 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-2 transition-all duration-300 pointer-events-auto border border-zinc-700';
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-green-500 text-sm"></i><span>${msg}</span>`;
             container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.classList.remove('opacity-0', 'translate-y-2');
-            }, 10);
 
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'translate-y-2');
